@@ -5,17 +5,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
 
-<body>
+<body class="container p-3">
   <h1>Movie List</h1>
 
-  <ul id="movieList"></ul>
+  <div id="successMessage"></div>
+  <ul class="row" id="movieList"></ul>
 
   <script>
     const apiUrl = 'https://va-5-assignment-express-student-neog.replit.app/movies'
     const movieList = document.querySelector("#movieList")
+    const successMessage = document.querySelector("#successMessage")
 
     function fetchData() {
       movieList.textContent = "Loading..."
@@ -26,14 +29,40 @@
         .then(function (data) {
           if (data) {
             movieList.textContent = " "
+            successMessage.textContent = " "
             for (let i = 0; i < data.length; i++) {
               const liElement = document.createElement('li')
 
-              liElement.textContent = `
-                ${data[i].title} - ${data[i].language} - ${data[i].rating} - ${data[i].director} `
+              liElement.className = 'col-md-12 py-2'
+
+              liElement.innerHTML = `
+                ${data[i].title} - ${data[i].language} - ${data[i].rating} - ${data[i].director}<button class="btn btn-danger float-end" id="deleteBtn" data-id="${data[i]._id}">DELETE</button>`
               movieList.appendChild(liElement)
             }
           }
+          const deleteBtn = document.querySelectorAll("#deleteBtn")
+          for (let i = 0; i < deleteBtn.length; i++) {
+            deleteBtn[i].addEventListener('click', function (event) {
+              const movieId = event.target.getAttribute('data-id')
+
+              const API_DELETE_URL = `https://va-5-assignment-express-student-neog.replit.app/movies/${movieId}`
+
+              fetch(API_DELETE_URL, {
+                method: "DELETE"
+              })
+                .then(function (response) {
+                  return response.json()
+                })
+                .then(function (data) {
+                  if (data) {
+                    successMessage.textContent = "Movie Deleted Successfully"
+                    fetchData()
+                  }
+                })
+            })
+          }
+
+
 
         })
         .catch(function (error) {
